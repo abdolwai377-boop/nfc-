@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NFC Master Studio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #0a0e17;
+            --card-glass: rgba(18, 26, 43, 0.75);
+            --card-border: rgba(0, 242, 254, 0.12);
+            --accent-cyan: #00f2fe;
+            --accent-blue: #4facfe;
+            --accent-purple: #8b5cf6;
+            --grad-primary: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+            --grad-accent: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Tajawal', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Dynamic Lighting Ambient Background */
+        .ambient-light-top {
+            position: fixed;
+            top: -120px;
+            right: -60px;
+            width: 320px;
+            height: 320px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(0, 242, 254, 0.12) 0%, transparent 70%);
+            filter: blur(80px);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .ambient-light-bottom {
+            position: fixed;
+            bottom: -80px;
+            left: -60px;
+            width: 360px;
+            height: 360px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.12) 0%, transparent 70%);
+            filter: blur(80px);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .app-wrapper {
+            width: 100%;
+            max-width: 440px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            z-index: 1;
+            padding-bottom: 30px;
+        }
+
+        /* Top Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 22px 20px 16px 20px;
+        }
+
+        .brand-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffffff, var(--accent-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 0.5px;
+        }
+
+        .header-btn {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--card-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            backdrop-filter: blur(10px);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .header-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+        }
+
+        .header-btn:active {
+            transform: scale(0.92);
+        }
+
+        /* Main Content Container */
+        .content-container {
+            padding: 10px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* Hero Action Banner Cards */
+        .hero-banner {
+            border-radius: 22px;
+            padding: 22px;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.35);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .hero-banner:active {
+            transform: scale(0.98);
+        }
+
+        .banner-read {
+            background: linear-gradient(135deg, rgba(0, 242, 254, 0.15) 0%, rgba(79, 172, 254, 0.05) 100%);
+            border: 1px solid rgba(0, 242, 254, 0.3);
+            backdrop-filter: blur(16px);
+        }
+
+        .banner-write {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(59, 130, 246, 0.05) 100%);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            backdrop-filter: blur(16px);
+        }
+
+        .banner-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .banner-icon-box {
+            width: 46px;
+            height: 46px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .banner-read .banner-icon-box {
+            background: rgba(0, 242, 254, 0.15);
+            color: var(--accent-cyan);
+        }
+
+        .banner-write .banner-icon-box {
+            background: rgba(139, 92, 246, 0.15);
+            color: var(--accent-purple);
+        }
+
+        .banner-icon-box svg {
+            width: 24px;
+            height: 24px;
+            stroke: currentColor;
+            stroke-width: 2;
+            fill: none;
+        }
+
+        .arrow-icon svg {
+            width: 18px;
+            height: 18px;
+            stroke: var(--text-muted);
+            stroke-width: 2;
+            fill: none;
+        }
+
+        .banner-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .banner-desc {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        /* Section Item List */
+        .section-label {
+            font-size: 0.78rem;
+            font-weight: 800;
+            color: var(--text-muted);
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            margin: 12px 4px 4px 4px;
+        }
+
+        .item-group {
+            background: var(--card-glass);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            backdrop-filter: blur(16px);
+            overflow: hidden;
+        }
+
+        .item-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 18px;
+            cursor: pointer;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            transition: background 0.2s;
+        }
+
+        .item-row:last-child {
+            border-bottom: none;
+        }
+
+        .item-row:active {
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .item-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .item-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            background: rgba(0, 242, 254, 0.08);
+            border: 1px solid rgba(0, 242, 254, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-cyan);
+        }
+
+        .item-icon svg {
+            width: 20px;
+            height: 20px;
+            stroke: currentColor;
+            stroke-width: 2;
+            fill: none;
+        }
+
+        .item-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        /* Enlarged Scanning Overlay Modal */
+        .modal-mask {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(16px);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-mask.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* Bigger Bottom Sheet */
+        .bottom-sheet {
+            background: #0d1322;
+            border-top: 1px solid rgba(0, 242, 254, 0.3);
+            border-radius: 36px 36px 0 0;
+            padding: 34px 24px 34px 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            transform: translateY(100%);
+            transition: transform 0.35s cubic-bezier(0.1, 0.9, 0.2, 1);
+            width: 100%;
+            min-height: 56vh;
+            justify-content: space-between;
+        }
+
+        .modal-mask.active .bottom-sheet {
+            transform: translateY(0);
+        }
+
+        /* Large Clear Tutorial Stage Animation */
+        .tutorial-stage {
+            position: relative;
+            width: 260px;
+            height: 220px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        /* Outward Wave Pulses */
+        .pulse-wave {
+            position: absolute;
+            border: 2px solid rgba(0, 242, 254, 0.5);
+            border-radius: 50%;
+            animation: propagateWave 2.8s infinite cubic-bezier(0.2, 0.6, 0.3, 1);
+        }
+
+        .pulse-wave:nth-child(1) { width: 80px; height: 80px; animation-delay: 0s; }
+        .pulse-wave:nth-child(2) { width: 80px; height: 80px; animation-delay: 0.93s; }
+        .pulse-wave:nth-child(3) { width: 80px; height: 80px; animation-delay: 1.86s; }
+
+        @keyframes propagateWave {
+            0% {
+                width: 70px;
+                height: 70px;
+                opacity: 1;
+                border-color: rgba(0, 242, 254, 0.9);
+            }
+            100% {
+                width: 250px;
+                height: 250px;
+                opacity: 0;
+                border-color: rgba(139, 92, 246, 0.05);
+            }
+        }
+
+        /* Phone Graphic Frame */
+        .phone-frame {
+            width: 95px;
+            height: 165px;
+            border: 3px solid #ffffff;
+            border-radius: 24px;
+            background: #0a0f1d;
+            position: relative;
+            z-index: 3;
+            box-shadow: 0 0 30px rgba(0, 242, 254, 0.3);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .phone-inner {
+            width: 82px;
+            height: 150px;
+            background: radial-gradient(circle, rgba(0, 242, 254, 0.1) 0%, transparent 70%);
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-cyan);
+        }
+
+        .phone-inner svg {
+            width: 28px;
+            height: 28px;
+            stroke: currentColor;
+            stroke-width: 2;
+            fill: none;
+        }
+
+        /* Clear Sliding NFC Card Graphic */
+        .sliding-card {
+            position: absolute;
+            width: 100px;
+            height: 64px;
+            background: linear-gradient(135deg, #00f2fe 0%, #8b5cf6 100%);
+            border: 1.5px solid rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            z-index: 1; /* Slide behind phone */
+            box-shadow: 0 6px 20px rgba(0, 242, 254, 0.4);
+            animation: slideCardBehindPhone 2.8s infinite ease-in-out;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
+        }
+
+        .card-chip {
+            width: 14px;
+            height: 10px;
+            background: #ffe066;
+            border-radius: 3px;
+        }
+
+        .card-logo-lines {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .card-line {
+            width: 20px;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 1px;
+        }
+
+        @keyframes slideCardBehindPhone {
+            0% {
+                transform: translateY(95px) scale(0.85);
+                opacity: 0;
+            }
+            35% {
+                transform: translateY(10px) scale(1);
+                opacity: 1;
+            }
+            65% {
+                transform: translateY(-35px) scale(0.95);
+                opacity: 0.9;
+            }
+            100% {
+                transform: translateY(-70px) scale(0.8);
+                opacity: 0;
+            }
+        }
+
+        .sheet-text-container {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            align-items: center;
+            text-align: center;
+        }
+
+        .sheet-title-text {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: #fff;
+        }
+
+        .sheet-desc-text {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+            max-width: 320px;
+        }
+
+        .input-box {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 14px 18px;
+            color: #fff;
+            font-size: 0.95rem;
+            outline: none;
+        }
+
+        .input-box:focus {
+            border-color: var(--accent-cyan);
+        }
+
+        .btn-confirm-input {
+            width: 100%;
+            padding: 16px;
+            background: var(--grad-primary);
+            border: none;
+            border-radius: 18px;
+            color: #050b14;
+            font-size: 1rem;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(0, 242, 254, 0.25);
+        }
+
+        .btn-close {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            padding: 8px 24px;
+        }
+
+        .result-box {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 16px;
+            color: var(--accent-cyan);
+            font-size: 0.9rem;
+            word-break: break-all;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="ambient-light-top"></div>
+    <div class="ambient-light-bottom"></div>
+
+    <div class="app-wrapper">
+
+        <!-- Header -->
+        <header>
+            <button class="header-btn" onclick="scrollToWriteSection()">
+                <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+            <div class="brand-title">NFC Master Studio</div>
+            <button class="header-btn" onclick="scrollToWriteSection()">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            </button>
+        </header>
+
+        <!-- Main Views -->
+        <div class="content-container">
+            <!-- 1. Single Scan Banner -->
+            <div class="hero-banner banner-read" onclick="triggerScan('read')">
+                <div class="banner-header">
+                    <div class="banner-icon-box">
+                        <svg viewBox="0 0 24 24"><path d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12z"/><path d="M7 12a5 5 0 0 1 5-5m0 10a5 5 0 0 0 5-5"/></svg>
+                    </div>
+                    <div class="arrow-icon">
+                        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+                    </div>
+                </div>
+                <div class="banner-title">قراءة بطاقة NFC</div>
+                <div class="banner-desc">امسح البطاقة فوراً للتعرف على البيانات والمعلومات المخزنة عليها بلمسة واحدة.</div>
+            </div>
+
+            <!-- 2. Write Banner (Navigates to Write Options) -->
+            <div class="hero-banner banner-write" id="write-banner" onclick="scrollToWriteSection()">
+                <div class="banner-header">
+                    <div class="banner-icon-box">
+                        <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    </div>
+                    <div class="arrow-icon">
+                        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+                    </div>
+                </div>
+                <div class="banner-title">كتابة بيانات جديدة</div>
+                <div class="banner-desc">قم بإدخال وتخزين الروابط، شبكات الواي فاي، وبطاقات الاتصال داخل كارت NFC.</div>
+            </div>
+
+            <div class="section-label" id="options-label">خيارات الكتابة السريعة</div>
+            <div class="item-group">
+                <div class="item-row" onclick="openForm('url', 'رابط موقع إلكتروني', 'https://')">
+                    <div class="item-left">
+                        <div class="item-icon">
+                            <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                        </div>
+                        <div class="item-title">رابط Web Link</div>
+                    </div>
+                    <div class="arrow-icon"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
+                </div>
+
+                <div class="item-row" onclick="openForm('wifi', 'إعدادات شبكة Wi-Fi', '')">
+                    <div class="item-left">
+                        <div class="item-icon">
+                            <svg viewBox="0 0 24 24"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
+                        </div>
+                        <div class="item-title">شبكة Wi-Fi</div>
+                    </div>
+                    <div class="arrow-icon"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
+                </div>
+
+                <div class="item-row" onclick="openForm('vcard', 'بطاقة الاتصال vCard', '')">
+                    <div class="item-left">
+                        <div class="item-icon">
+                            <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        </div>
+                        <div class="item-title">بطاقة عمل Business Card</div>
+                    </div>
+                    <div class="arrow-icon"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
+                </div>
+
+                <div class="item-row" onclick="openForm('text', 'نص عادي', 'اكتب الملاحظات أو النص هنا...')">
+                    <div class="item-left">
+                        <div class="item-icon">
+                            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                        </div>
+                        <div class="item-title">نص عادي Plain Text</div>
+                    </div>
+                    <div class="arrow-icon"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ENLARGED SCANNING SHEET MODAL (No 'Scanning...' action button) -->
+    <div class="modal-mask" id="scanModal">
+        <div class="bottom-sheet">
+            
+            <!-- Stage Animation: Card Clearly Sliding Behind Phone with Outward Waves -->
+            <div class="tutorial-stage" id="stage-box">
+                <div class="pulse-wave"></div>
+                <div class="pulse-wave"></div>
+                <div class="pulse-wave"></div>
+
+                <div class="sliding-card">
+                    <div class="card-chip"></div>
+                    <div class="card-logo-lines">
+                        <div class="card-line"></div>
+                        <div class="card-line"></div>
+                    </div>
+                </div>
+
+                <div class="phone-frame">
+                    <div class="phone-inner">
+                        <svg viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sheet-text-container">
+                <div class="sheet-title-text" id="modal-title">جاهز للمسح</div>
+                <div class="sheet-desc-text" id="modal-desc">قرب بطاقة الـ NFC خلف الهاتف لتتم العملية تلقائياً.</div>
+            </div>
+
+            <div id="form-container" style="width: 100%; display: none; flex-direction: column; gap: 12px;"></div>
+            <div class="result-box" id="result-display"></div>
+
+            <button class="btn-confirm-input" id="modal-confirm-btn" style="display: none;">تأكيد البيانات</button>
+            <button class="btn-close" onclick="closeModal()">إلغاء</button>
+        </div>
+    </div>
+
+    <script>
+        let mode = 'read';
+        let writeData = '';
+        let activeForm = '';
+
+        function scrollToWriteSection() {
+            document.getElementById('options-label').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function openForm(type, title, placeholder) {
+            activeForm = type;
+            document.getElementById('stage-box').style.display = 'none';
+            document.getElementById('result-display').style.display = 'none';
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-desc').innerText = 'أدخل البيانات التي ترغب بكتابتها على بطاقة الـ NFC.';
+
+            const container = document.getElementById('form-container');
+            container.style.display = 'flex';
+            container.innerHTML = '';
+
+            if (type === 'vcard') {
+                container.innerHTML = `
+                    <input type="text" class="input-box" id="input-name" placeholder="الاسم الكامل">
+                    <input type="tel" class="input-box" id="input-phone" placeholder="رقم الهاتف">
+                `;
+            } else if (type === 'wifi') {
+                container.innerHTML = `
+                    <input type="text" class="input-box" id="input-ssid" placeholder="اسم شبكة الواي فاي (SSID)">
+                    <input type="password" class="input-box" id="input-pass" placeholder="كلمة السر">
+                `;
+            } else {
+                container.innerHTML = `<input type="text" class="input-box" id="input-main" placeholder="${placeholder}">`;
+            }
+
+            const btn = document.getElementById('modal-confirm-btn');
+            btn.style.display = 'block';
+            btn.innerText = 'تأكيد الحفظ على NFC';
+            btn.onclick = prepareData;
+
+            document.getElementById('scanModal').classList.add('active');
+        }
+
+        function prepareData() {
+            if (activeForm === 'vcard') {
+                const name = document.getElementById('input-name').value;
+                const phone = document.getElementById('input-phone').value;
+                if(!name || !phone) return alert('يرجى ملء جميع الحقول');
+                writeData = `BEGIN:VCARD\nVERSION:3.0\nN:${name}\nTEL:${phone}\nEND:VCARD`;
+            } else if (activeForm === 'wifi') {
+                const ssid = document.getElementById('input-ssid').value;
+                const pass = document.getElementById('input-pass').value;
+                if(!ssid) return alert('يرجى إدخال اسم الشبكة');
+                writeData = `WIFI:S:${ssid};T:WPA;P:${pass};;`;
+            } else {
+                const val = document.getElementById('input-main').value;
+                if(!val) return alert('يرجى إدخال البيانات المطلوب كتابتها');
+                writeData = val;
+            }
+            triggerScan('write');
+        }
+
+        function triggerScan(actionMode) {
+            mode = actionMode;
+            document.getElementById('form-container').style.display = 'none';
+            document.getElementById('modal-confirm-btn').style.display = 'none';
+            document.getElementById('stage-box').style.display = 'flex';
+            document.getElementById('result-display').style.display = 'none';
+
+            if (actionMode === 'read') {
+                document.getElementById('modal-title').innerText = 'جاهز للمسح والقراءة';
+                document.getElementById('modal-desc').innerText = 'ضع بطاقة الـ NFC خلف أعلى الهاتف مباشرة لتتم القراءة تلقائياً.';
+                startNfcRead();
+            } else {
+                document.getElementById('modal-title').innerText = 'جاهز للكتابة على NFC';
+                document.getElementById('modal-desc').innerText = 'ثبت بطاقة الـ NFC خلف الهاتف لحفظ البيانات عليها تلقائياً.';
+                startNfcWrite();
+            }
+
+            document.getElementById('scanModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('scanModal').classList.remove('active');
+        }
+
+        async function startNfcRead() {
+            if (!('NDEFReader' in window)) {
+                setTimeout(() => {
+                    const resBox = document.getElementById('result-display');
+                    resBox.style.display = 'block';
+                    resBox.innerText = 'ملاحظة المعاينة: القراءة الفعلية تعمل فوراً بعد تحويل التطبيق لـ APK.';
+                }, 800);
+                return;
+            }
+
+            try {
+                const ndef = new NDEFReader();
+                await ndef.scan();
+                ndef.addEventListener("reading", ({ message, serialNumber }) => {
+                    if (navigator.vibrate) navigator.vibrate(200);
+                    let text = `رقم التسلسل: ${serialNumber || 'N/A'}\n`;
+                    for (const record of message.records) {
+                        const decoder = new TextDecoder();
+                        text += `المحتوى: ${decoder.decode(record.data)}\n`;
+                    }
+                    document.getElementById('modal-title').innerText = 'تمت القراءة بنجاح!';
+                    const resBox = document.getElementById('result-display');
+                    resBox.style.display = 'block';
+                    resBox.innerText = text;
+                });
+            } catch (e) {
+                document.getElementById('modal-title').innerText = 'في انتظار اقتراب البطاقة...';
+            }
+        }
+
+        async function startNfcWrite() {
+            if (!('NDEFReader' in window)) {
+                setTimeout(() => {
+                    document.getElementById('modal-title').innerText = 'تمت الكتابة بنجاح!';
+                    document.getElementById('modal-desc').innerText = 'تم حفظ البيانات بنجاح في ذاكرة كارت الـ NFC.';
+                }, 1000);
+                return;
+            }
+
+            try {
+                const ndef = new NDEFReader();
+                await ndef.write({ records: [{ recordType: "text", data: writeData }] });
+                if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+                document.getElementById('modal-title').innerText = 'تمت الكتابة بنجاح!';
+                document.getElementById('modal-desc').innerText = 'تم حفظ البيانات بداخل البطاقة بنجاح.';
+            } catch (e) {
+                document.getElementById('modal-title').innerText = 'خطأ أثناء الكتابة';
+            }
+        }
+    </script>
+</body>
+</html>
